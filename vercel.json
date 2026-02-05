@@ -1,4 +1,1 @@
-{
-  "_comment": "Cron jobs disabled for free tier - can trigger manually or add later",
-  "crons": []
-}
+{}
