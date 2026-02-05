@@ -42,13 +42,12 @@ export function SheetsConfiguration() {
     setMessage(null);
 
     try {
-      // Column mapping for: A=Name, B=Twitter Handle, C=Notes, D=Status, E=Date Contacted
+      // Column mapping for: A=Name, B=Email, C=Username, D=Notes, E=Following, F=Followers
       const columnMapping = {
-        name: 0, // Column A
-        twitter_handle: 1, // Column B
-        notes: 2, // Column C
-        status: 3, // Column D
-        first_contact_date: 4, // Column E
+        name: 0, // Column A - Name
+        email: 1, // Column B - Email
+        twitter_handle: 2, // Column C - Username (Twitter handle)
+        notes: 3, // Column D - Notes
       };
 
       const response = await fetch('/api/contacts/sync', {
@@ -182,16 +181,15 @@ export function SheetsConfiguration() {
               Your sheet should have these columns in order:
             </p>
             <div className="text-xs text-blue-800 font-mono">
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <div className="bg-blue-100 p-1 rounded">A: Name</div>
-                <div className="bg-blue-100 p-1 rounded">B: Twitter Handle</div>
-                <div className="bg-blue-100 p-1 rounded">C: Notes</div>
-                <div className="bg-blue-100 p-1 rounded">D: Status</div>
-                <div className="bg-blue-100 p-1 rounded">E: Date Contacted</div>
+                <div className="bg-blue-100 p-1 rounded">B: Email</div>
+                <div className="bg-blue-100 p-1 rounded">C: Username</div>
+                <div className="bg-blue-100 p-1 rounded">D: Notes</div>
               </div>
             </div>
             <p className="text-xs text-blue-800 mt-2">
-              First row should be headers. Name and Twitter Handle are required. Email column optional.
+              First row should be headers. Name required. Either Email OR Username (Twitter handle) required.
             </p>
           </div>
 
