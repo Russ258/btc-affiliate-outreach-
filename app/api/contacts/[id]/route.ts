@@ -43,7 +43,8 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('contacts')
       .update({
-        email: body.email,
+        email: body.email || null,
+        twitter_handle: body.twitter_handle || null,
         name: body.name,
         company: body.company,
         phone: body.phone,
@@ -63,7 +64,7 @@ export async function PATCH(
     if (error) {
       if (error.code === '23505') {
         return NextResponse.json(
-          { error: 'A contact with this email already exists' },
+          { error: 'A contact with this email or Twitter handle already exists' },
           { status: 409 }
         );
       }

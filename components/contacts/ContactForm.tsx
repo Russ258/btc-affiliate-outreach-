@@ -13,6 +13,7 @@ export function ContactForm({ contact, onSubmit, onCancel }: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: contact?.name || '',
     email: contact?.email || '',
+    twitter_handle: contact?.twitter_handle || '',
     company: contact?.company || '',
     phone: contact?.phone || '',
     website: contact?.website || '',
@@ -30,6 +31,13 @@ export function ContactForm({ contact, onSubmit, onCancel }: ContactFormProps) {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validate that either email OR twitter_handle is provided
+    if (!formData.email && !formData.twitter_handle) {
+      setError('Please provide either an email or Twitter handle');
+      setLoading(false);
+      return;
+    }
 
     try {
       await onSubmit(formData);
@@ -64,15 +72,32 @@ export function ContactForm({ contact, onSubmit, onCancel }: ContactFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
+            Email
           </label>
           <input
             type="email"
-            required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
+            placeholder="contact@example.com"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Twitter Handle
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-2 text-gray-500">@</span>
+            <input
+              type="text"
+              value={formData.twitter_handle}
+              onChange={(e) => setFormData({ ...formData, twitter_handle: e.target.value.replace('@', '') })}
+              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
+              placeholder="username"
+            />
+          </div>
+          <p className="mt-1 text-xs text-gray-500">Without @ symbol</p>
         </div>
 
         <div>

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%`);
+      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,twitter_handle.ilike.%${search}%,company.ilike.%${search}%`);
     }
 
     const { data, error } = await query;
@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       .from('contacts')
       .insert([
         {
-          email: body.email,
+          email: body.email || null,
+          twitter_handle: body.twitter_handle || null,
           name: body.name,
           company: body.company,
           phone: body.phone,
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       if (error.code === '23505') {
         return NextResponse.json(
-          { error: 'A contact with this email already exists' },
+          { error: 'A contact with this email or Twitter handle already exists' },
           { status: 409 }
         );
       }

@@ -84,7 +84,9 @@ export function ContactList({ contacts, onDelete }: ContactListProps) {
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex flex-col">
                   <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                  <div className="text-sm text-gray-500">{contact.email}</div>
+                  <div className="text-sm text-gray-500">
+                    {contact.email || (contact.twitter_handle ? `@${contact.twitter_handle}` : '-')}
+                  </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

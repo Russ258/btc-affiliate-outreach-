@@ -5,7 +5,8 @@ export type CommunicationDirection = 'inbound' | 'outbound';
 
 export interface Contact {
   id: string;
-  email: string;
+  email?: string; // Made optional - can use twitter_handle instead
+  twitter_handle?: string; // Twitter/X handle without @ symbol
   name: string;
   company?: string;
   phone?: string;
