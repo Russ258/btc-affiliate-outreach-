@@ -103,10 +103,13 @@ export function parseSheetData(
   columnMapping: {
     name?: number;
     email?: number;
+    twitter_handle?: number;
     company?: number;
     phone?: number;
     website?: number;
     notes?: number;
+    status?: number;
+    first_contact_date?: number;
   }
 ) {
   // Skip header row (first row)
@@ -129,6 +132,10 @@ export function parseSheetData(
       if (columnMapping.email !== undefined && row[columnMapping.email]) {
         contact.email = String(row[columnMapping.email]).trim().toLowerCase();
       }
+      if (columnMapping.twitter_handle !== undefined && row[columnMapping.twitter_handle]) {
+        // Remove @ symbol if present
+        contact.twitter_handle = String(row[columnMapping.twitter_handle]).trim().replace(/^@/, '');
+      }
       if (columnMapping.company !== undefined && row[columnMapping.company]) {
         contact.company = String(row[columnMapping.company]).trim();
       }
@@ -141,16 +148,31 @@ export function parseSheetData(
       if (columnMapping.notes !== undefined && row[columnMapping.notes]) {
         contact.notes = String(row[columnMapping.notes]).trim();
       }
+      if (columnMapping.status !== undefined && row[columnMapping.status]) {
+        const statusValue = String(row[columnMapping.status]).trim().toLowerCase();
+        // Map common status values
+        if (['new', 'contacted', 'responded', 'interested', 'declined'].includes(statusValue)) {
+          contact.status = statusValue;
+        }
+      }
+      if (columnMapping.first_contact_date !== undefined && row[columnMapping.first_contact_date]) {
+        const dateStr = String(row[columnMapping.first_contact_date]).trim();
+        if (dateStr) {
+          contact.first_contact_date = new Date(dateStr).toISOString();
+        }
+      }
 
-      // Must have at least name and email
-      if (!contact.name || !contact.email) {
+      // Must have at least name AND (email OR twitter_handle)
+      if (!contact.name || (!contact.email && !contact.twitter_handle)) {
         return null;
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contact.email)) {
-        return null;
+      // Validate email format if email is provided
+      if (contact.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(contact.email)) {
+          contact.email = null; // Clear invalid email
+        }
       }
 
       return contact;

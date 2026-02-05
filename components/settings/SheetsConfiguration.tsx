@@ -42,14 +42,13 @@ export function SheetsConfiguration() {
     setMessage(null);
 
     try {
-      // Default column mapping (assumes standard format)
+      // Column mapping for: A=Name, B=Twitter Handle, C=Notes, D=Status, E=Date Contacted
       const columnMapping = {
         name: 0, // Column A
-        email: 1, // Column B
-        company: 2, // Column C
-        phone: 3, // Column D
-        website: 4, // Column E
-        notes: 5, // Column F
+        twitter_handle: 1, // Column B
+        notes: 2, // Column C
+        status: 3, // Column D
+        first_contact_date: 4, // Column E
       };
 
       const response = await fetch('/api/contacts/sync', {
@@ -183,17 +182,16 @@ export function SheetsConfiguration() {
               Your sheet should have these columns in order:
             </p>
             <div className="text-xs text-blue-800 font-mono">
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-5 gap-2">
                 <div className="bg-blue-100 p-1 rounded">A: Name</div>
-                <div className="bg-blue-100 p-1 rounded">B: Email</div>
-                <div className="bg-blue-100 p-1 rounded">C: Company</div>
-                <div className="bg-blue-100 p-1 rounded">D: Phone</div>
-                <div className="bg-blue-100 p-1 rounded">E: Website</div>
-                <div className="bg-blue-100 p-1 rounded">F: Notes</div>
+                <div className="bg-blue-100 p-1 rounded">B: Twitter Handle</div>
+                <div className="bg-blue-100 p-1 rounded">C: Notes</div>
+                <div className="bg-blue-100 p-1 rounded">D: Status</div>
+                <div className="bg-blue-100 p-1 rounded">E: Date Contacted</div>
               </div>
             </div>
             <p className="text-xs text-blue-800 mt-2">
-              First row should be headers. Name and Email are required.
+              First row should be headers. Name and Twitter Handle are required. Email column optional.
             </p>
           </div>
 
