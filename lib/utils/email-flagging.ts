@@ -37,9 +37,9 @@ export function shouldFlagEmail(
   const subjectLower = subject.toLowerCase();
   const bodyLower = body.toLowerCase();
 
-  // Check if sender is a known contact
+  // Check if sender is a known contact (only check contacts with email)
   const matchingContact = contacts.find(
-    (c) => c.email.toLowerCase() === emailLower
+    (c) => c.email && c.email.toLowerCase() === emailLower
   );
 
   if (matchingContact) {
@@ -77,6 +77,7 @@ export function shouldFlagEmail(
   const emailDomain = emailLower.split('@')[1];
   if (emailDomain) {
     const domainMatch = contacts.find((c) => {
+      if (!c.email) return false;
       const contactDomain = c.email.toLowerCase().split('@')[1];
       return contactDomain === emailDomain;
     });
@@ -156,7 +157,7 @@ export function calculateEmailPriority(
 
   // Known contact (+30)
   const matchingContact = contacts.find(
-    (c) => c.email.toLowerCase() === fromEmail.toLowerCase()
+    (c) => c.email && c.email.toLowerCase() === fromEmail.toLowerCase()
   );
   if (matchingContact) {
     score += 30;

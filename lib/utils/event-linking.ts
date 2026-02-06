@@ -13,7 +13,7 @@ export function linkEventToContacts(
 
   for (const email of attendeeEmails) {
     const match = contacts.find(
-      (c) => c.email.toLowerCase() === email.toLowerCase()
+      (c) => c.email && c.email.toLowerCase() === email.toLowerCase()
     );
 
     if (match && !contactIds.includes(match.id)) {
