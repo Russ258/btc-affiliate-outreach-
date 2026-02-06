@@ -98,7 +98,8 @@ export async function POST(request: NextRequest) {
     if (newContacts.length > 0) {
       const contactsToInsert = newContacts.map((c) => ({
         name: c.name,
-        email: c.email,
+        email: c.email || null,
+        twitter_handle: c.twitter_handle || null,
         company: c.company,
         phone: c.phone,
         website: c.website,
