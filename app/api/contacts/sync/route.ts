@@ -135,6 +135,14 @@ export async function POST(request: NextRequest) {
       duplicatesFound: duplicates.length,
       duplicates: duplicates,
       totalProcessed: parsedContacts.length,
+      debug: {
+        totalRows: rows.length,
+        parsedCount: parsedContacts.length,
+        newContactsCount: newContacts.length,
+        duplicatesCount: duplicates.length,
+        firstParsedContact: parsedContacts[0] || null,
+        firstNewContact: newContacts[0] || null,
+      },
     });
   } catch (error) {
     console.error('Sync error:', error);

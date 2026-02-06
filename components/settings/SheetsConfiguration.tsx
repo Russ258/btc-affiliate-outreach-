@@ -77,9 +77,14 @@ export function SheetsConfiguration() {
       } else {
         setMessage({
           type: 'success',
-          text: `Successfully imported ${data.imported} contacts from Google Sheets!`,
+          text: `Successfully imported ${data.imported} contacts from Google Sheets! ${data.debug ? `(Processed ${data.debug.parsedCount} rows)` : ''}`,
         });
         // Refresh contacts page if user navigates there
+      }
+
+      // Log debug info to console for troubleshooting
+      if (data.debug) {
+        console.log('Import debug info:', data.debug);
       }
     } catch (error) {
       setMessage({
