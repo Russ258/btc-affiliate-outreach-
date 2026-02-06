@@ -78,8 +78,8 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatsCard
-          title="Outreach Today"
-          value={loading ? '...' : stats?.outreachToday || 0}
+          title="Total Outreach"
+          value={loading ? '...' : stats?.totalOutreach || 0}
           icon={
             <svg
               className="h-6 w-6 text-orange-500"
@@ -95,7 +95,8 @@ export default function Dashboard() {
               />
             </svg>
           }
-          subtitle="Contacts reached out to today"
+          subtitle="All contacts reached out to"
+          badge={stats?.outreachToday ? `${stats.outreachToday} today` : undefined}
           highlight={true}
         />
 

@@ -8,12 +8,20 @@ interface StatsCardProps {
   };
   subtitle?: string;
   highlight?: boolean;
+  badge?: string;
 }
 
-export function StatsCard({ title, value, icon, trend, subtitle, highlight }: StatsCardProps) {
+export function StatsCard({ title, value, icon, trend, subtitle, highlight, badge }: StatsCardProps) {
   return (
     <div className={`bg-white overflow-hidden shadow rounded-lg ${highlight ? 'ring-2 ring-orange-500' : ''}`}>
-      <div className="p-5">
+      <div className="p-5 relative">
+        {badge && (
+          <div className="absolute top-2 right-2">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+              {badge}
+            </span>
+          </div>
+        )}
         <div className="flex items-center">
           <div className="flex-shrink-0">{icon}</div>
           <div className="ml-5 w-0 flex-1">

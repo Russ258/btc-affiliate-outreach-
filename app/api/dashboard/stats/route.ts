@@ -96,7 +96,13 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .gte('received_at', lastWeek.toISOString());
 
-    // Outreach today (contacts where last_contact_date is today)
+    // Total outreach (all contacts that have been contacted - all time)
+    const { count: totalOutreach } = await supabase
+      .from('contacts')
+      .select('*', { count: 'exact', head: true })
+      .not('last_contact_date', 'is', null);
+
+    // Outreach today (for the corner ticker)
     const { count: outreachToday } = await supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
@@ -115,6 +121,7 @@ export async function GET() {
         eventsToday: eventsToday || 0,
         newContactsThisWeek: newContactsThisWeek || 0,
         emailsThisWeek: emailsThisWeek || 0,
+        totalOutreach: totalOutreach || 0,
         outreachToday: outreachToday || 0,
         statusCounts,
       },
