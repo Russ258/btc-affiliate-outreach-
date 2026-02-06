@@ -28,12 +28,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug: Log first few rows
+    console.log('First 3 rows from sheet:', rows.slice(0, 3));
+    console.log('Column mapping:', columnMapping);
+
     // Parse sheet data into contact objects
     const parsedContacts = parseSheetData(rows, columnMapping);
 
+    console.log('Parsed contacts count:', parsedContacts.length);
+    if (parsedContacts.length > 0) {
+      console.log('First parsed contact:', parsedContacts[0]);
+    }
+
     if (parsedContacts.length === 0) {
       return NextResponse.json(
-        { error: 'No valid contacts found in spreadsheet' },
+        {
+          error: 'No valid contacts found in spreadsheet',
+          debug: {
+            totalRows: rows.length,
+            firstRow: rows[0],
+            secondRow: rows[1],
+            columnMapping
+          }
+        },
         { status: 400 }
       );
     }
