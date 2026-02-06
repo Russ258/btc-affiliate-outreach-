@@ -66,6 +66,12 @@ export function SheetsConfiguration() {
         throw new Error(data.error || 'Failed to sync');
       }
 
+      // Show debug info for troubleshooting
+      if (data.debug) {
+        console.log('Import debug info:', data.debug);
+        alert(`DEBUG INFO:\nTotal rows: ${data.debug.totalRows}\nParsed contacts: ${data.debug.parsedCount}\nNew contacts: ${data.debug.newContactsCount}\nDuplicates: ${data.debug.duplicatesCount}\n\nFirst parsed contact: ${JSON.stringify(data.debug.firstParsedContact, null, 2)}`);
+      }
+
       if (data.duplicatesFound > 0) {
         // Show duplicate resolver
         setDuplicates(data.duplicates);
@@ -80,11 +86,6 @@ export function SheetsConfiguration() {
           text: `Successfully imported ${data.imported} contacts from Google Sheets! ${data.debug ? `(Processed ${data.debug.parsedCount} rows)` : ''}`,
         });
         // Refresh contacts page if user navigates there
-      }
-
-      // Log debug info to console for troubleshooting
-      if (data.debug) {
-        console.log('Import debug info:', data.debug);
       }
     } catch (error) {
       setMessage({
