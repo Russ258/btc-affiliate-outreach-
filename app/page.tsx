@@ -10,16 +10,35 @@ import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [lastFetchDate, setLastFetchDate] = useState<string>('');
 
   useEffect(() => {
     fetchStats();
-  }, []);
+
+    // Auto-refresh at midnight and every 5 minutes
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentDate = now.toDateString();
+
+      // If we've crossed into a new day, refresh stats
+      if (lastFetchDate && currentDate !== lastFetchDate) {
+        console.log('New day detected, refreshing stats...');
+        fetchStats();
+      } else {
+        // Otherwise, refresh every 5 minutes to keep data fresh
+        fetchStats();
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [lastFetchDate]);
 
   const fetchStats = async () => {
     try {
       const response = await fetch('/api/dashboard/stats');
       const data = await response.json();
       setStats(data.stats);
+      setLastFetchDate(new Date().toDateString());
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     } finally {
@@ -30,10 +49,30 @@ export default function Dashboard() {
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Welcome back! Here&apos;s what&apos;s happening with your affiliate outreach.
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Welcome back! Here&apos;s what&apos;s happening with your affiliate outreach.
+            </p>
+          </div>
+          <div className="text-right">
+            <button
+              onClick={() => fetchStats()}
+              className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+            {lastFetchDate && (
+              <p className="text-xs text-gray-400 mt-1">
+                Auto-refreshes at midnight
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
