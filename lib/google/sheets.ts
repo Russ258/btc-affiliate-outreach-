@@ -151,7 +151,7 @@ export function parseSheetData(
       if (columnMapping.status !== undefined && row[columnMapping.status]) {
         const statusValue = String(row[columnMapping.status]).trim().toLowerCase();
         // Map common status values
-        if (['new', 'contacted', 'responded', 'interested', 'declined'].includes(statusValue)) {
+        if (['new', 'contacted', 'responded', 'interested', 'accepted', 'declined'].includes(statusValue)) {
           contact.status = statusValue;
         }
       }

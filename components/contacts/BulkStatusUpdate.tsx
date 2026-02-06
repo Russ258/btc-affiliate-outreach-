@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export function BulkStatusUpdate({ onComplete }: { onComplete?: () => void }) {
   const [identifierText, setIdentifierText] = useState('');
-  const [status, setStatus] = useState<'new' | 'contacted' | 'responded' | 'interested' | 'declined'>('contacted');
+  const [status, setStatus] = useState<'new' | 'contacted' | 'responded' | 'interested' | 'accepted' | 'declined'>('contacted');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
     updated: number;
@@ -89,6 +89,7 @@ export function BulkStatusUpdate({ onComplete }: { onComplete?: () => void }) {
             <option value="contacted">Contacted</option>
             <option value="responded">Responded</option>
             <option value="interested">Interested</option>
+            <option value="accepted">Accepted</option>
             <option value="declined">Declined</option>
           </select>
         </div>

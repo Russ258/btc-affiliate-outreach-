@@ -207,6 +207,7 @@ export default function ContactsPage() {
                 <option value="contacted">Contacted</option>
                 <option value="responded">Responded</option>
                 <option value="interested">Interested</option>
+                <option value="accepted">Accepted</option>
                 <option value="declined">Declined</option>
               </select>
             </div>

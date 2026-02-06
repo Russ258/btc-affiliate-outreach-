@@ -1,4 +1,4 @@
-export type ContactStatus = 'new' | 'contacted' | 'responded' | 'interested' | 'declined';
+export type ContactStatus = 'new' | 'contacted' | 'responded' | 'interested' | 'accepted' | 'declined';
 export type ContactPriority = 'low' | 'medium' | 'high';
 export type CommunicationType = 'email' | 'call' | 'meeting';
 export type CommunicationDirection = 'inbound' | 'outbound';

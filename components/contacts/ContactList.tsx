@@ -17,6 +17,7 @@ function getStatusColor(status: ContactStatus) {
     contacted: 'bg-yellow-100 text-yellow-800',
     responded: 'bg-purple-100 text-purple-800',
     interested: 'bg-green-100 text-green-800',
+    accepted: 'bg-teal-100 text-teal-800',
     declined: 'bg-red-100 text-red-800',
   };
   return colors[status];
@@ -107,6 +108,7 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                     <option value="contacted">Contacted</option>
                     <option value="responded">Responded</option>
                     <option value="interested">Interested</option>
+                    <option value="accepted">Accepted</option>
                     <option value="declined">Declined</option>
                   </select>
                 ) : (
