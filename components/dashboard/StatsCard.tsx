@@ -7,11 +7,12 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   subtitle?: string;
+  highlight?: boolean;
 }
 
-export function StatsCard({ title, value, icon, trend, subtitle }: StatsCardProps) {
+export function StatsCard({ title, value, icon, trend, subtitle, highlight }: StatsCardProps) {
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
+    <div className={`bg-white overflow-hidden shadow rounded-lg ${highlight ? 'ring-2 ring-orange-500' : ''}`}>
       <div className="p-5">
         <div className="flex items-center">
           <div className="flex-shrink-0">{icon}</div>

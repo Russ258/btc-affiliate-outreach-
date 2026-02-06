@@ -39,6 +39,28 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatsCard
+          title="Outreach Today"
+          value={loading ? '...' : stats?.outreachToday || 0}
+          icon={
+            <svg
+              className="h-6 w-6 text-orange-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+          }
+          subtitle="Contacts reached out to today"
+          highlight={true}
+        />
+
+        <StatsCard
           title="Total Contacts"
           value={loading ? '...' : stats?.totalContacts || 0}
           icon={

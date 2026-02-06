@@ -96,6 +96,13 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .gte('received_at', lastWeek.toISOString());
 
+    // Outreach today (contacts where last_contact_date is today)
+    const { count: outreachToday } = await supabase
+      .from('contacts')
+      .select('*', { count: 'exact', head: true })
+      .gte('last_contact_date', todayStart.toISOString())
+      .lte('last_contact_date', todayEnd.toISOString());
+
     return NextResponse.json({
       stats: {
         totalContacts: totalContacts || 0,
@@ -108,6 +115,7 @@ export async function GET() {
         eventsToday: eventsToday || 0,
         newContactsThisWeek: newContactsThisWeek || 0,
         emailsThisWeek: emailsThisWeek || 0,
+        outreachToday: outreachToday || 0,
         statusCounts,
       },
     });
