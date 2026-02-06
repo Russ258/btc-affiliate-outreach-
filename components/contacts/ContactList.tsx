@@ -6,6 +6,8 @@ import { Contact, ContactStatus, ContactPriority } from '@/types';
 interface ContactListProps {
   contacts: Contact[];
   onDelete?: (id: string) => void;
+  onStatusChange?: (id: string, status: ContactStatus) => void;
+  onPriorityChange?: (id: string, priority: ContactPriority) => void;
 }
 
 // Returns a CSS class name for styling status badges based on the contact status
@@ -30,7 +32,7 @@ function getPriorityColor(priority: ContactPriority) {
   return colors[priority];
 }
 
-export function ContactList({ contacts, onDelete }: ContactListProps) {
+export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange }: ContactListProps) {
   if (contacts.length === 0) {
     return (
       <div className="text-center py-12">
@@ -93,22 +95,52 @@ export function ContactList({ contacts, onDelete }: ContactListProps) {
                 <div className="text-sm text-gray-900">{contact.company || '-'}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                    contact.status
-                  )}`}
-                >
-                  {contact.status}
-                </span>
+                {onStatusChange ? (
+                  <select
+                    value={contact.status}
+                    onChange={(e) => onStatusChange(contact.id, e.target.value as ContactStatus)}
+                    className={`px-2 text-xs leading-5 font-semibold rounded-full border-0 ${getStatusColor(
+                      contact.status
+                    )}`}
+                  >
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="responded">Responded</option>
+                    <option value="interested">Interested</option>
+                    <option value="declined">Declined</option>
+                  </select>
+                ) : (
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                      contact.status
+                    )}`}
+                  >
+                    {contact.status}
+                  </span>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(
-                    contact.priority
-                  )}`}
-                >
-                  {contact.priority}
-                </span>
+                {onPriorityChange ? (
+                  <select
+                    value={contact.priority}
+                    onChange={(e) => onPriorityChange(contact.id, e.target.value as ContactPriority)}
+                    className={`px-2 text-xs leading-5 font-semibold rounded-full border-0 ${getPriorityColor(
+                      contact.priority
+                    )}`}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                ) : (
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(
+                      contact.priority
+                    )}`}
+                  >
+                    {contact.priority}
+                  </span>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {contact.next_followup_date

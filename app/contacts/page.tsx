@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { Contact } from '@/types';
 import { ContactList } from '@/components/contacts/ContactList';
 import { ContactForm } from '@/components/contacts/ContactForm';
+import { BulkStatusUpdate } from '@/components/contacts/BulkStatusUpdate';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,25 +69,110 @@ export default function ContactsPage() {
     }
   };
 
+  const handleStatusChange = async (id: string, status: string) => {
+    try {
+      const contact = contacts.find((c) => c.id === id);
+      if (!contact) return;
+
+      const response = await fetch(`/api/contacts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...contact,
+          status,
+          last_contact_date: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        // Update local state immediately for better UX
+        setContacts(contacts.map((c) => (c.id === id ? { ...c, status: status as any } : c)));
+      }
+    } catch (error) {
+      console.error('Failed to update contact status:', error);
+    }
+  };
+
+  const handlePriorityChange = async (id: string, priority: string) => {
+    try {
+      const contact = contacts.find((c) => c.id === id);
+      if (!contact) return;
+
+      const response = await fetch(`/api/contacts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...contact,
+          priority,
+        }),
+      });
+
+      if (response.ok) {
+        // Update local state immediately for better UX
+        setContacts(contacts.map((c) => (c.id === id ? { ...c, priority: priority as any } : c)));
+      }
+    } catch (error) {
+      console.error('Failed to update contact priority:', error);
+    }
+  };
+
   return (
     <div className="px-4 sm:px-0">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700"
-        >
-          Add Contact
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBulkUpdate(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Bulk Update
+          </button>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700"
+          >
+            Add Contact
+          </button>
+        </div>
       </div>
 
       {showAddForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Contact</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Add New Contact</h3>
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
             <ContactForm
               onSubmit={handleAddContact}
               onCancel={() => setShowAddForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {showBulkUpdate && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Bulk Status Update</h3>
+              <button
+                onClick={() => setShowBulkUpdate(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <BulkStatusUpdate
+              onComplete={() => {
+                fetchContacts();
+                setShowBulkUpdate(false);
+              }}
             />
           </div>
         </div>
@@ -145,7 +232,12 @@ export default function ContactsPage() {
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading contacts...</div>
           ) : (
-            <ContactList contacts={contacts} onDelete={handleDeleteContact} />
+            <ContactList
+              contacts={contacts}
+              onDelete={handleDeleteContact}
+              onStatusChange={handleStatusChange}
+              onPriorityChange={handlePriorityChange}
+            />
           )}
         </div>
       </div>
