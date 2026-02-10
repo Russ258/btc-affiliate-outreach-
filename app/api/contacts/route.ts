@@ -1,18 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
-// GET /api/contacts - List all contacts with optional filtering
+// GET /api/contacts - List contacts (personal or team based on view param)
 export async function GET(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+
+    // Get current user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
     const search = searchParams.get('search');
+    const view = searchParams.get('view') || 'team'; // 'personal' or 'team'
 
     let query = supabase
       .from('contacts')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Filter based on view
+    if (view === 'personal') {
+      // Show only user's personal contacts
+      query = query.eq('user_id', session.user.id).eq('is_shared', false);
+    } else {
+      // Show team contacts (is_shared = true)
+      query = query.eq('is_shared', true);
+    }
 
     if (status) {
       query = query.eq('status', status);
@@ -44,6 +63,14 @@ export async function GET(request: NextRequest) {
 // POST /api/contacts - Create a new contact
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+
+    // Get current user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -60,8 +87,10 @@ export async function POST(request: NextRequest) {
           priority: body.priority || 'medium',
           notes: body.notes,
           tags: body.tags,
-          first_contact_date: body.first_contact_date,
-          next_followup_date: body.next_followup_date,
+          first_contact_date: body.first_contact_date || null,
+          next_followup_date: body.next_followup_date || null,
+          user_id: session.user.id,
+          is_shared: body.is_shared || false, // Default to personal contact
         },
       ])
       .select()

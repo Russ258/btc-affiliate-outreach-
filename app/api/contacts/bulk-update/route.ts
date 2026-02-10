@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     if (updateField === 'next_followup_date') {
       // Allow setting next followup date
-      updateData.next_followup_date = body.next_followup_date;
+      updateData.next_followup_date = body.next_followup_date || null;
     }
 
     const updatePromises = matchedContacts.map((contact) =>

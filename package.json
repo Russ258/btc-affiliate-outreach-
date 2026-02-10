@@ -13,6 +13,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@supabase/supabase-js": "^2.45.7",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "googleapis": "^144.0.0",
     "date-fns": "^4.1.0",
     "clsx": "^2.1.1",

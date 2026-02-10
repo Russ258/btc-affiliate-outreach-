@@ -14,15 +14,17 @@ export default function ContactsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [view, setView] = useState<'team' | 'personal'>('team'); // Toggle between team and personal
 
   useEffect(() => {
     fetchContacts();
-  }, [statusFilter, priorityFilter, searchTerm]);
+  }, [statusFilter, priorityFilter, searchTerm, view]);
 
   const fetchContacts = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      params.append('view', view);
       if (statusFilter) params.append('status', statusFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
       if (searchTerm) params.append('search', searchTerm);
@@ -118,8 +120,33 @@ export default function ContactsPage() {
 
   return (
     <div className="px-4 sm:px-0">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
+          {/* View Toggle */}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => setView('team')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                view === 'team'
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Team Contacts
+            </button>
+            <button
+              onClick={() => setView('personal')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                view === 'personal'
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              My Contacts
+            </button>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setShowBulkUpdate(true)}
