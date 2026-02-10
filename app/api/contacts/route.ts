@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
 
     // Filter based on view
     if (view === 'personal') {
-      // Show only user's personal contacts
-      query = query.eq('user_id', session.user.id).eq('is_shared', false);
+      // Show only user's personal contacts (but they're still shared with team)
+      query = query.eq('user_id', session.user.id);
     } else {
-      // Show team contacts (is_shared = true)
+      // Show ALL team contacts (everyone's contacts)
       query = query.eq('is_shared', true);
     }
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           first_contact_date: body.first_contact_date || null,
           next_followup_date: body.next_followup_date || null,
           user_id: session.user.id,
-          is_shared: body.is_shared || false, // Default to personal contact
+          is_shared: true, // Always shared with team
         },
       ])
       .select()
