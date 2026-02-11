@@ -176,7 +176,7 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                   <select
                     value={contact.comms || 'x'}
                     onChange={(e) => onCommsChange(contact.id, e.target.value as CommsChannel)}
-                    className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="px-2 py-1 text-xs text-gray-900 font-medium border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="x">X</option>
                     <option value="instagram">Instagram</option>
