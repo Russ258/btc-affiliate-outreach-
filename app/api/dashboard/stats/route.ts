@@ -19,15 +19,12 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get('userId');
 
-    // Build base query with optional user filter
-    let baseQuery = supabase.from('contacts');
-    if (userId) {
-      baseQuery = baseQuery.eq('user_id', userId);
-    }
-
     // Total contacts
-    const { count: totalContacts } = await baseQuery
-      .select('*', { count: 'exact', head: true });
+    let totalContactsQuery = supabase.from('contacts').select('*', { count: 'exact', head: true });
+    if (userId) {
+      totalContactsQuery = totalContactsQuery.eq('user_id', userId);
+    }
+    const { count: totalContacts } = await totalContactsQuery;
 
     // Contacts by status
     let statusQuery = supabase.from('contacts').select('status');
