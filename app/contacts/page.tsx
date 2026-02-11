@@ -131,6 +131,81 @@ export default function ContactsPage() {
     }
   };
 
+  const downloadCSV = () => {
+    if (contacts.length === 0) {
+      alert('No contacts to download');
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      'Name',
+      'Email',
+      'Twitter Handle',
+      'Follower Count',
+      'Company',
+      'Phone',
+      'Website',
+      'Status',
+      'Priority',
+      'Notes',
+      'Tags',
+      'First Contact Date',
+      'Last Contact Date',
+      'Next Followup Date',
+    ];
+
+    // Convert contacts to CSV rows
+    const rows = contacts.map((contact) => [
+      contact.name || '',
+      contact.email || '',
+      contact.twitter_handle || '',
+      contact.follower_count || '',
+      contact.company || '',
+      contact.phone || '',
+      contact.website || '',
+      contact.status || '',
+      contact.priority || '',
+      contact.notes || '',
+      (contact.tags || []).join('; '),
+      contact.first_contact_date || '',
+      contact.last_contact_date || '',
+      contact.next_followup_date || '',
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) =>
+        row.map((cell) => {
+          // Escape quotes and wrap in quotes if contains comma, quote, or newline
+          const cellStr = String(cell);
+          if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+            return `"${cellStr.replace(/"/g, '""')}"`;
+          }
+          return cellStr;
+        }).join(',')
+      ),
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    // Generate filename with current filters
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filterPart = statusFilter ? `_${statusFilter}` : '';
+    const filename = `contacts${filterPart}_${timestamp}.csv`;
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="px-4 sm:px-0">
       <div className="flex justify-between items-center mb-6">
@@ -161,6 +236,16 @@ export default function ContactsPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={downloadCSV}
+            disabled={contacts.length === 0}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download CSV
+          </button>
           <button
             onClick={() => setShowBulkFollowerUpdate(true)}
             className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
