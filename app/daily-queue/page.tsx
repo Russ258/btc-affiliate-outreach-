@@ -37,15 +37,31 @@ interface QueueStats {
   total: number;
 }
 
+interface BlocklistEntry {
+  id: string;
+  name: string;
+  reason: string;
+  email: string;
+  twitter_handle: string;
+  youtube_channel: string;
+  created_at: string;
+}
+
 export default function DailyQueuePage() {
   const [queue, setQueue] = useState<QueueContact[]>([]);
   const [stats, setStats] = useState<QueueStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string>('');
+  const [showBlocklist, setShowBlocklist] = useState(false);
+  const [blocklist, setBlocklist] = useState<BlocklistEntry[]>([]);
+  const [bulkNames, setBulkNames] = useState('');
+  const [reason, setReason] = useState('');
+  const [addingToBlocklist, setAddingToBlocklist] = useState(false);
 
   useEffect(() => {
     fetchQueue();
+    fetchBlocklist();
   }, []);
 
   const fetchQueue = async () => {
@@ -62,6 +78,72 @@ export default function DailyQueuePage() {
       console.error('Failed to fetch queue:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBlocklist = async () => {
+    try {
+      const response = await fetch('/api/blocklist');
+      const data = await response.json();
+      setBlocklist(data.blocklist || []);
+    } catch (error) {
+      console.error('Failed to fetch blocklist:', error);
+    }
+  };
+
+  const addToBlocklist = async () => {
+    if (!bulkNames.trim()) {
+      alert('Please enter at least one name');
+      return;
+    }
+
+    setAddingToBlocklist(true);
+    try {
+      const names = bulkNames
+        .split('\n')
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+      const response = await fetch('/api/blocklist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ names, reason }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setBulkNames('');
+        setReason('');
+        await fetchBlocklist();
+        alert(`Added ${data.added} name(s) to blocklist`);
+      } else {
+        alert(data.error || 'Failed to add to blocklist');
+      }
+    } catch (error) {
+      console.error('Failed to add to blocklist:', error);
+      alert('Failed to add to blocklist');
+    } finally {
+      setAddingToBlocklist(false);
+    }
+  };
+
+  const removeFromBlocklist = async (id: string) => {
+    if (!confirm('Remove this name from the blocklist?')) return;
+
+    try {
+      const response = await fetch(`/api/blocklist?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchBlocklist();
+      } else {
+        alert('Failed to remove from blocklist');
+      }
+    } catch (error) {
+      console.error('Failed to remove from blocklist:', error);
+      alert('Failed to remove from blocklist');
     }
   };
 
@@ -118,28 +200,39 @@ export default function DailyQueuePage() {
               Your personalized list of fresh prospects to reach out to today
             </p>
           </div>
-          <button
-            onClick={generateQueue}
-            disabled={generating}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {generating ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
-              </>
-            ) : (
-              <>
-                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Generate List
-              </>
-            )}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowBlocklist(!showBlocklist)}
+              className="inline-flex items-center px-4 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            >
+              <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+              Blocklist ({blocklist.length})
+            </button>
+            <button
+              onClick={generateQueue}
+              disabled={generating}
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {generating ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Generate List
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Stats Bar */}
@@ -178,6 +271,118 @@ export default function DailyQueuePage() {
           </p>
         )}
       </div>
+
+      {/* Blocklist Section */}
+      {showBlocklist && (
+        <div className="mb-8 bg-white shadow rounded-lg overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Blocklist Management</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Names added here will never appear in your daily queue
+            </p>
+          </div>
+
+          {/* Add to Blocklist Form */}
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Add to Blocklist</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Names (one per line)
+                </label>
+                <textarea
+                  value={bulkNames}
+                  onChange={(e) => setBulkNames(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="John Doe&#10;Jane Smith&#10;Company Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason (optional)
+                </label>
+                <input
+                  type="text"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="e.g., Already working with, Declined, etc."
+                />
+              </div>
+
+              <button
+                onClick={addToBlocklist}
+                disabled={addingToBlocklist}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
+              >
+                {addingToBlocklist ? 'Adding...' : 'Add to Blocklist'}
+              </button>
+            </div>
+          </div>
+
+          {/* Blocklist Table */}
+          <div>
+            <div className="px-6 py-3 bg-gray-50">
+              <h3 className="text-sm font-medium text-gray-900">
+                Blocked Names ({blocklist.length})
+              </h3>
+            </div>
+
+            {blocklist.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500 text-sm">
+                No blocked names yet. Add names above to exclude them from your daily queue.
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Reason
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Added
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {blocklist.map((entry) => (
+                      <tr key={entry.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {entry.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {entry.reason || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(entry.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => removeFromBlocklist(entry.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
 
       {/* Queue List */}
       {loading ? (
