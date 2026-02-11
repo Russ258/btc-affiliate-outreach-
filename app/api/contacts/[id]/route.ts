@@ -85,6 +85,7 @@ export async function PATCH(
       .single();
 
     if (error) {
+      console.error('Supabase update error:', error);
       if (error.code === '23505') {
         return NextResponse.json(
           { error: 'A contact with this email or Twitter handle already exists' },
@@ -95,9 +96,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ contact: data });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Contact update error:', error);
     return NextResponse.json(
-      { error: 'Failed to update contact' },
+      { error: error.message || 'Failed to update contact' },
       { status: 500 }
     );
   }
