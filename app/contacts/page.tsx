@@ -424,6 +424,7 @@ export default function ContactsPage() {
               onDelete={handleDeleteContact}
               onStatusChange={handleStatusChange}
               onPriorityChange={handlePriorityChange}
+              onUpdateContact={fetchContacts}
             />
           )}
         </div>

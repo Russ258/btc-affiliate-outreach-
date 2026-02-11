@@ -6,6 +6,7 @@ import { DailyBriefing } from '@/components/dashboard/DailyBriefing';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
+import { FollowerTierAnalytics } from '@/components/dashboard/FollowerTierAnalytics';
 
 interface TeamMember {
   id: string;
@@ -250,6 +251,11 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <UpcomingEvents />
         <RecentActivity />
+      </div>
+
+      {/* Follower Tier Analytics */}
+      <div className="mb-8">
+        <FollowerTierAnalytics />
       </div>
 
       {/* Getting Started (only show if no contacts) */}
