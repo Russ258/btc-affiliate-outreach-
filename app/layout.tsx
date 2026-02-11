@@ -39,12 +39,6 @@ export default function RootLayout({
                       Daily Queue
                     </Link>
                     <Link
-                      href="/blocklist"
-                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-orange-600"
-                    >
-                      Blocklist
-                    </Link>
-                    <Link
                       href="/contacts"
                       className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-orange-600"
                     >
