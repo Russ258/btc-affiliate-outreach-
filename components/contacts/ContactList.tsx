@@ -1,16 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { Contact, ContactStatus, ContactPriority, CommsChannel } from '@/types';
+import { Contact, ContactStatus, ContactPriority } from '@/types';
 
 interface ContactListProps {
   contacts: Contact[];
   onDelete?: (id: string) => void;
   onStatusChange?: (id: string, status: ContactStatus) => void;
   onPriorityChange?: (id: string, priority: ContactPriority) => void;
-  onCommsChange?: (id: string, comms: CommsChannel) => void;
-  onUpdateContact?: () => void;
 }
 
 // Returns a CSS class name for styling status badges based on the contact status
@@ -48,60 +45,7 @@ function formatFollowerCount(count?: number) {
   return count.toLocaleString();
 }
 
-// Returns display label for comms channel
-function getCommsLabel(comms?: CommsChannel) {
-  const labels: Record<CommsChannel, string> = {
-    x: 'X',
-    instagram: 'Instagram',
-    telegram: 'Telegram',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    messages: 'Messages',
-  };
-  return comms ? labels[comms] : '-';
-}
-
-export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange, onCommsChange, onUpdateContact }: ContactListProps) {
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
-  const [noteText, setNoteText] = useState('');
-  const [savingNote, setSavingNote] = useState(false);
-
-  const handleOpenNoteModal = (contact: Contact) => {
-    setEditingNoteId(contact.id);
-    setNoteText(contact.notes || '');
-  };
-
-  const handleSaveNote = async () => {
-    if (!editingNoteId) return;
-
-    setSavingNote(true);
-    try {
-      const contact = contacts.find((c) => c.id === editingNoteId);
-      if (!contact) return;
-
-      const response = await fetch(`/api/contacts/${editingNoteId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...contact,
-          notes: noteText,
-        }),
-      });
-
-      if (response.ok) {
-        setEditingNoteId(null);
-        setNoteText('');
-        if (onUpdateContact) {
-          onUpdateContact();
-        }
-      }
-    } catch (error) {
-      console.error('Failed to save note:', error);
-    } finally {
-      setSavingNote(false);
-    }
-  };
-
+export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange }: ContactListProps) {
   if (contacts.length === 0) {
     return (
       <div className="text-center py-12">
@@ -136,9 +80,6 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
               Followers
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Comms
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -146,9 +87,6 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Next Follow-up
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Notes
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -170,24 +108,6 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                 <div className="text-sm font-medium text-gray-900">
                   {formatFollowerCount(contact.follower_count)}
                 </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {onCommsChange ? (
-                  <select
-                    value={contact.comms || 'x'}
-                    onChange={(e) => onCommsChange(contact.id, e.target.value as CommsChannel)}
-                    className="px-2 py-1 text-xs text-gray-900 font-medium border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="x">X</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="telegram">Telegram</option>
-                    <option value="email">Email</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="messages">Messages</option>
-                  </select>
-                ) : (
-                  <span className="text-sm text-gray-900">{getCommsLabel(contact.comms)}</span>
-                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {onStatusChange ? (
@@ -243,23 +163,6 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                   ? new Date(contact.next_followup_date).toLocaleDateString()
                   : '-'}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  {contact.notes ? (
-                    <span className="text-gray-600 truncate max-w-[150px]" title={contact.notes}>
-                      {contact.notes}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400 italic">No notes</span>
-                  )}
-                  <button
-                    onClick={() => handleOpenNoteModal(contact)}
-                    className="text-orange-600 hover:text-orange-900 text-xs"
-                  >
-                    {contact.notes ? 'Edit' : 'Add'}
-                  </button>
-                </div>
-              </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <Link
                   href={`/contacts/${contact.id}`}
@@ -280,45 +183,6 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
           ))}
         </tbody>
       </table>
-
-      {/* Quick Note Modal */}
-      {editingNoteId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Note</h3>
-              <button
-                onClick={() => setEditingNoteId(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Add a quick note about this contact..."
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setEditingNoteId(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveNote}
-                disabled={savingNote}
-                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50"
-              >
-                {savingNote ? 'Saving...' : 'Save Note'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

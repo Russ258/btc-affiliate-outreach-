@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('contacts')
       .insert([
         {
@@ -100,7 +100,6 @@ export async function POST(request: NextRequest) {
           website: body.website,
           status: body.status || 'new',
           priority: body.priority || 'medium',
-          comms: body.comms || 'x', // Default to X
           notes: body.notes,
           tags: body.tags,
           first_contact_date: body.first_contact_date || null,
