@@ -5,12 +5,14 @@ import { Contact } from '@/types';
 import { ContactList } from '@/components/contacts/ContactList';
 import { ContactForm } from '@/components/contacts/ContactForm';
 import { BulkStatusUpdate } from '@/components/contacts/BulkStatusUpdate';
+import { BulkFollowerUpdate } from '@/components/contacts/BulkFollowerUpdate';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [showBulkFollowerUpdate, setShowBulkFollowerUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -149,6 +151,12 @@ export default function ContactsPage() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => setShowBulkFollowerUpdate(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+          >
+            Update Followers
+          </button>
+          <button
             onClick={() => setShowBulkUpdate(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
@@ -199,6 +207,28 @@ export default function ContactsPage() {
               onComplete={() => {
                 fetchContacts();
                 setShowBulkUpdate(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {showBulkFollowerUpdate && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Bulk Update Follower Counts</h3>
+              <button
+                onClick={() => setShowBulkFollowerUpdate(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <BulkFollowerUpdate
+              onComplete={() => {
+                fetchContacts();
+                setShowBulkFollowerUpdate(false);
               }}
             />
           </div>
