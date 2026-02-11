@@ -8,6 +8,7 @@ import { BulkStatusUpdate } from '@/components/contacts/BulkStatusUpdate';
 import { BulkFollowerUpdate } from '@/components/contacts/BulkFollowerUpdate';
 
 export default function ContactsPage() {
+  const [mounted, setMounted] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -19,8 +20,18 @@ export default function ContactsPage() {
   const [view, setView] = useState<'team' | 'personal'>('team'); // Toggle between team and personal
 
   useEffect(() => {
-    fetchContacts();
-  }, [statusFilter, priorityFilter, searchTerm, view]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchContacts();
+    }
+  }, [statusFilter, priorityFilter, searchTerm, view, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   const fetchContacts = async () => {
     setLoading(true);
