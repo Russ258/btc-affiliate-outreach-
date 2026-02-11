@@ -7,6 +7,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { FollowerTierAnalytics } from '@/components/dashboard/FollowerTierAnalytics';
+import { ContactPipeline } from '@/components/dashboard/ContactPipeline';
 
 interface TeamMember {
   id: string;
@@ -251,6 +252,11 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <UpcomingEvents />
         <RecentActivity />
+      </div>
+
+      {/* Contact Pipeline */}
+      <div className="mb-8">
+        <ContactPipeline />
       </div>
 
       {/* Follower Tier Analytics */}
