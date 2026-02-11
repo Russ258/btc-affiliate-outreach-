@@ -33,6 +33,18 @@ export default function RootLayout({
                       Dashboard
                     </Link>
                     <Link
+                      href="/daily-queue"
+                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-orange-600"
+                    >
+                      Daily Queue
+                    </Link>
+                    <Link
+                      href="/blocklist"
+                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-orange-600"
+                    >
+                      Blocklist
+                    </Link>
+                    <Link
                       href="/contacts"
                       className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-orange-600"
                     >
