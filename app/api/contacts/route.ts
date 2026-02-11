@@ -5,7 +5,8 @@ import { cookies } from 'next/headers';
 // GET /api/contacts - List contacts (personal or team based on view param)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get current user
     const { data: { session } } = await supabase.auth.getSession();
@@ -63,7 +64,8 @@ export async function GET(request: NextRequest) {
 // POST /api/contacts - Create a new contact
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get current user
     const { data: { session } } = await supabase.auth.getSession();
