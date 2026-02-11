@@ -7,10 +7,22 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 
+interface TeamMember {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [lastFetchDate, setLastFetchDate] = useState<string>('');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>('all');
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
 
   useEffect(() => {
     fetchStats();
@@ -31,11 +43,24 @@ export default function Dashboard() {
     }, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => clearInterval(interval);
-  }, [lastFetchDate]);
+  }, [lastFetchDate, selectedUserId]);
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      const data = await response.json();
+      setTeamMembers(data.users || []);
+    } catch (error) {
+      console.error('Failed to fetch team members:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/dashboard/stats');
+      const url = selectedUserId === 'all'
+        ? '/api/dashboard/stats'
+        : `/api/dashboard/stats?userId=${selectedUserId}`;
+      const response = await fetch(url);
       const data = await response.json();
       setStats(data.stats);
       setLastFetchDate(new Date().toDateString());
@@ -56,7 +81,27 @@ export default function Dashboard() {
               Welcome back! Here&apos;s what&apos;s happening with your affiliate outreach.
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex flex-col items-end gap-3">
+            {/* User Selector */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">View Stats For:</label>
+              <select
+                value={selectedUserId}
+                onChange={(e) => {
+                  setSelectedUserId(e.target.value);
+                  setLoading(true);
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="all">All Team</option>
+                {teamMembers.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="text-right">
             <button
               onClick={() => fetchStats()}
               className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
@@ -71,6 +116,7 @@ export default function Dashboard() {
                 Auto-refreshes at midnight
               </p>
             )}
+            </div>
           </div>
         </div>
       </div>

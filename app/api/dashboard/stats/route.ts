@@ -1,18 +1,40 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 // GET /api/dashboard/stats - Get dashboard statistics
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
+    // Check auth
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get userId from query params (optional - if not provided, show all team stats)
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+
+    // Build base query with optional user filter
+    let baseQuery = supabase.from('contacts');
+    if (userId) {
+      baseQuery = baseQuery.eq('user_id', userId);
+    }
+
     // Total contacts
-    const { count: totalContacts } = await supabase
-      .from('contacts')
+    const { count: totalContacts } = await baseQuery
       .select('*', { count: 'exact', head: true });
 
     // Contacts by status
-    const { data: contactsByStatus } = await supabase
-      .from('contacts')
-      .select('status');
+    let statusQuery = supabase.from('contacts').select('status');
+    if (userId) {
+      statusQuery = statusQuery.eq('user_id', userId);
+    }
+    const { data: contactsByStatus } = await statusQuery;
 
     const statusCounts = {
       new: 0,
@@ -40,11 +62,15 @@ export async function GET() {
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
-    const { count: followupsDue } = await supabase
+    let followupsQuery = supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
       .not('next_followup_date', 'is', null)
       .lte('next_followup_date', today.toISOString());
+    if (userId) {
+      followupsQuery = followupsQuery.eq('user_id', userId);
+    }
+    const { count: followupsDue } = await followupsQuery;
 
     // Flagged emails (unread)
     const { count: unreadEmails } = await supabase
@@ -86,10 +112,14 @@ export async function GET() {
     const lastWeek = new Date();
     lastWeek.setDate(lastWeek.getDate() - 7);
 
-    const { count: newContactsThisWeek } = await supabase
+    let newContactsQuery = supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', lastWeek.toISOString());
+    if (userId) {
+      newContactsQuery = newContactsQuery.eq('user_id', userId);
+    }
+    const { count: newContactsThisWeek } = await newContactsQuery;
 
     const { count: emailsThisWeek } = await supabase
       .from('flagged_emails')
@@ -97,17 +127,25 @@ export async function GET() {
       .gte('received_at', lastWeek.toISOString());
 
     // Total outreach (all contacts that have been contacted - all time)
-    const { count: totalOutreach } = await supabase
+    let totalOutreachQuery = supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
       .not('last_contact_date', 'is', null);
+    if (userId) {
+      totalOutreachQuery = totalOutreachQuery.eq('user_id', userId);
+    }
+    const { count: totalOutreach } = await totalOutreachQuery;
 
     // Outreach today (for the corner ticker)
-    const { count: outreachToday } = await supabase
+    let outreachTodayQuery = supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
       .gte('last_contact_date', todayStart.toISOString())
       .lte('last_contact_date', todayEnd.toISOString());
+    if (userId) {
+      outreachTodayQuery = outreachTodayQuery.eq('user_id', userId);
+    }
+    const { count: outreachToday } = await outreachTodayQuery;
 
     return NextResponse.json({
       stats: {
