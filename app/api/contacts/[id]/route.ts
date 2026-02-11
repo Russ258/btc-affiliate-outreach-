@@ -64,6 +64,7 @@ export async function PATCH(
         website: body.website,
         status: body.status,
         priority: body.priority,
+        comms: body.comms || null,
         notes: body.notes,
         tags: body.tags,
         first_contact_date: body.first_contact_date,

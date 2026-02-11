@@ -2,6 +2,7 @@ export type ContactStatus = 'new' | 'contacted' | 'responded' | 'interested' | '
 export type ContactPriority = 'low' | 'medium' | 'high';
 export type CommunicationType = 'email' | 'call' | 'meeting';
 export type CommunicationDirection = 'inbound' | 'outbound';
+export type CommsChannel = 'x' | 'instagram' | 'telegram' | 'email' | 'whatsapp' | 'messages';
 
 export interface Contact {
   id: string;
@@ -14,6 +15,7 @@ export interface Contact {
   status: ContactStatus;
   priority: ContactPriority;
   follower_count?: number; // Twitter/X follower count
+  comms?: CommsChannel; // Preferred communication channel
   first_contact_date?: string;
   last_contact_date?: string;
   next_followup_date?: string;

@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Contact, ContactStatus, ContactPriority } from '@/types';
+import { Contact, ContactStatus, ContactPriority, CommsChannel } from '@/types';
 
 interface ContactListProps {
   contacts: Contact[];
   onDelete?: (id: string) => void;
   onStatusChange?: (id: string, status: ContactStatus) => void;
   onPriorityChange?: (id: string, priority: ContactPriority) => void;
+  onCommsChange?: (id: string, comms: CommsChannel) => void;
   onUpdateContact?: () => void;
 }
 
@@ -47,7 +48,20 @@ function formatFollowerCount(count?: number) {
   return count.toLocaleString();
 }
 
-export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange, onUpdateContact }: ContactListProps) {
+// Returns display label for comms channel
+function getCommsLabel(comms?: CommsChannel) {
+  const labels: Record<CommsChannel, string> = {
+    x: 'X',
+    instagram: 'Instagram',
+    telegram: 'Telegram',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    messages: 'Messages',
+  };
+  return comms ? labels[comms] : '-';
+}
+
+export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange, onCommsChange, onUpdateContact }: ContactListProps) {
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
   const [savingNote, setSavingNote] = useState(false);
@@ -122,6 +136,9 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
               Followers
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Comms
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -153,6 +170,24 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                 <div className="text-sm font-medium text-gray-900">
                   {formatFollowerCount(contact.follower_count)}
                 </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {onCommsChange ? (
+                  <select
+                    value={contact.comms || 'x'}
+                    onChange={(e) => onCommsChange(contact.id, e.target.value as CommsChannel)}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="x">X</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="email">Email</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="messages">Messages</option>
+                  </select>
+                ) : (
+                  <span className="text-sm text-gray-900">{getCommsLabel(contact.comms)}</span>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {onStatusChange ? (

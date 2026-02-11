@@ -140,6 +140,29 @@ export default function ContactsPage() {
     }
   };
 
+  const handleCommsChange = async (id: string, comms: string) => {
+    try {
+      const contact = contacts.find((c) => c.id === id);
+      if (!contact) return;
+
+      const response = await fetch(`/api/contacts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...contact,
+          comms,
+        }),
+      });
+
+      if (response.ok) {
+        // Update local state immediately for better UX
+        setContacts(contacts.map((c) => (c.id === id ? { ...c, comms: comms as any } : c)));
+      }
+    } catch (error) {
+      console.error('Failed to update contact comms:', error);
+    }
+  };
+
   const downloadCSV = () => {
     if (contacts.length === 0) {
       alert('No contacts to download');
@@ -424,6 +447,7 @@ export default function ContactsPage() {
               onDelete={handleDeleteContact}
               onStatusChange={handleStatusChange}
               onPriorityChange={handlePriorityChange}
+              onCommsChange={handleCommsChange}
               onUpdateContact={fetchContacts}
             />
           )}
