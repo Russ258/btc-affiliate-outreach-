@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) })
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     await supabase.auth.exchangeCodeForSession(code)
   }
 

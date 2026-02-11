@@ -6,7 +6,8 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get current user
     const { data: { session } } = await supabase.auth.getSession();
@@ -65,7 +66,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get current user
     const { data: { session } } = await supabase.auth.getSession();
