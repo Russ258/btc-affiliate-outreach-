@@ -49,8 +49,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse data rows
-    let updated = 0;
+    // First, get all contacts
+    const { data: allContacts } = await supabase
+      .from('contacts')
+      .select('id, name');
+
+    if (!allContacts) {
+      return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 });
+    }
+
+    // Build a map for faster lookup (case-insensitive)
+    const contactMap = new Map<string, number>();
+    allContacts.forEach(contact => {
+      contactMap.set(contact.name.toLowerCase(), contact.id);
+    });
+
+    // Parse CSV and build updates
+    const updates: Array<{ id: number; follower_count: number }> = [];
     let notFound = 0;
 
     for (let i = 1; i < lines.length; i++) {
@@ -71,24 +86,41 @@ export async function POST(request: NextRequest) {
         followerCount = parseInt(cleaned) || 0;
       }
 
-      // Update contact by name (case-insensitive)
-      const { data, error } = await supabase
-        .from('contacts')
-        .update({ follower_count: followerCount })
-        .ilike('name', name)
-        .select();
-
-      if (error) {
-        console.error(`Error updating ${name}:`, error);
-        continue;
-      }
-
-      if (data && data.length > 0) {
-        updated += data.length;
+      // Find contact ID
+      const contactId = contactMap.get(name.toLowerCase());
+      if (contactId) {
+        updates.push({ id: contactId, follower_count: followerCount });
       } else {
         notFound++;
       }
     }
+
+    // Batch update in chunks of 100
+    let updated = 0;
+    const chunkSize = 100;
+
+    console.log(`Starting bulk update of ${updates.length} contacts...`);
+
+    for (let i = 0; i < updates.length; i += chunkSize) {
+      const chunk = updates.slice(i, i + chunkSize);
+
+      // Update each in the chunk
+      const results = await Promise.all(
+        chunk.map(async ({ id, follower_count }) => {
+          const { error } = await supabase
+            .from('contacts')
+            .update({ follower_count })
+            .eq('id', id);
+
+          return !error;
+        })
+      );
+
+      updated += results.filter(Boolean).length;
+      console.log(`Progress: ${updated}/${updates.length} contacts updated`);
+    }
+
+    console.log(`Bulk update complete: ${updated} updated, ${notFound} not found`);
 
     return NextResponse.json({
       updated,

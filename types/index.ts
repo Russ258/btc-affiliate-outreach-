@@ -13,6 +13,7 @@ export interface Contact {
   website?: string;
   status: ContactStatus;
   priority: ContactPriority;
+  follower_count?: number; // Twitter/X follower count
   first_contact_date?: string;
   last_contact_date?: string;
   next_followup_date?: string;

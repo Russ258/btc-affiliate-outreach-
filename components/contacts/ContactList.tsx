@@ -33,6 +33,18 @@ function getPriorityColor(priority: ContactPriority) {
   return colors[priority];
 }
 
+// Formats follower count for display (e.g., 1.2M, 450K, 1234)
+function formatFollowerCount(count?: number) {
+  if (!count) return '-';
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + 'M';
+  }
+  if (count >= 1000) {
+    return (count / 1000).toFixed(1) + 'K';
+  }
+  return count.toLocaleString();
+}
+
 export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChange }: ContactListProps) {
   if (contacts.length === 0) {
     return (
@@ -65,7 +77,7 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
               Name
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Company
+              Followers
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
@@ -93,7 +105,9 @@ export function ContactList({ contacts, onDelete, onStatusChange, onPriorityChan
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{contact.company || '-'}</div>
+                <div className="text-sm font-medium text-gray-900">
+                  {formatFollowerCount(contact.follower_count)}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {onStatusChange ? (

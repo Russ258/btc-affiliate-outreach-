@@ -107,7 +107,21 @@ export function BulkFollowerUpdate({ onComplete }: BulkFollowerUpdateProps) {
           </div>
         )}
 
-        {result && (
+        {loading && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+              <div className="text-blue-800">
+                <div className="font-medium">Processing your CSV...</div>
+                <div className="text-sm text-blue-600 mt-1">
+                  This may take 10-20 seconds for large files. Check your terminal for progress updates.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {result && !loading && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-md">
             <div className="text-green-800 font-medium mb-2">
               ✓ Bulk Update Complete!
@@ -125,7 +139,7 @@ export function BulkFollowerUpdate({ onComplete }: BulkFollowerUpdateProps) {
           disabled={loading || !file}
           className="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Updating...' : 'Update Follower Counts'}
+          {loading ? 'Processing... (check terminal for progress)' : 'Update Follower Counts'}
         </button>
       </form>
 
