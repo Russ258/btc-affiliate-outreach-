@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 interface StatsCardProps {
   title: string;
   value: number | string;
@@ -9,11 +11,12 @@ interface StatsCardProps {
   subtitle?: string;
   highlight?: boolean;
   badge?: string;
+  href?: string; // Optional link to make card clickable
 }
 
-export function StatsCard({ title, value, icon, trend, subtitle, highlight, badge }: StatsCardProps) {
-  return (
-    <div className={`bg-white overflow-hidden shadow rounded-lg ${highlight ? 'ring-2 ring-orange-500' : ''}`}>
+export function StatsCard({ title, value, icon, trend, subtitle, highlight, badge, href }: StatsCardProps) {
+  const cardContent = (
+    <div className="p-5 relative">
       <div className="p-5 relative">
         {badge && (
           <div className="absolute top-2 right-2">
@@ -44,6 +47,19 @@ export function StatsCard({ title, value, icon, trend, subtitle, highlight, badg
           </div>
         </div>
       </div>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={`block bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow cursor-pointer ${highlight ? 'ring-2 ring-orange-500' : ''}`}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={`bg-white overflow-hidden shadow rounded-lg ${highlight ? 'ring-2 ring-orange-500' : ''}`}>
+      {cardContent}
     </div>
   );
 }

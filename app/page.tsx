@@ -232,6 +232,7 @@ export default function Dashboard() {
             </svg>
           }
           subtitle="Need attention today"
+          href="/contacts?followups=due"
         />
       </div>
 

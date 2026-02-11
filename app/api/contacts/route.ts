@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get('priority');
     const search = searchParams.get('search');
     const view = searchParams.get('view') || 'team'; // 'personal' or 'team'
+    const followups = searchParams.get('followups'); // 'due' to show followups
 
     let query = supabase
       .from('contacts')
@@ -33,6 +34,16 @@ export async function GET(request: NextRequest) {
     } else {
       // Show ALL team contacts (everyone's contacts)
       query = query.eq('is_shared', true);
+    }
+
+    // Filter for follow-ups due
+    if (followups === 'due') {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      query = query
+        .not('next_followup_date', 'is', null)
+        .lte('next_followup_date', today.toISOString())
+        .eq('user_id', session.user.id); // Always personal for followups
     }
 
     if (status) {

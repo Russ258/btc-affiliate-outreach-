@@ -18,16 +18,24 @@ export default function ContactsPage() {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'team' | 'personal'>('team'); // Toggle between team and personal
+  const [showFollowupsDue, setShowFollowupsDue] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    // Check URL params for followups filter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('followups') === 'due') {
+      setShowFollowupsDue(true);
+      setView('personal'); // Show personal view when viewing followups
+    }
   }, []);
 
   useEffect(() => {
     if (mounted) {
       fetchContacts();
     }
-  }, [statusFilter, priorityFilter, searchTerm, view, mounted]);
+  }, [statusFilter, priorityFilter, searchTerm, view, showFollowupsDue, mounted]);
 
   if (!mounted) {
     return null;
@@ -41,6 +49,7 @@ export default function ContactsPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
       if (searchTerm) params.append('search', searchTerm);
+      if (showFollowupsDue) params.append('followups', 'due');
 
       const response = await fetch(`/api/contacts?${params}`);
       const data = await response.json();
@@ -327,6 +336,30 @@ export default function ContactsPage() {
                 setShowBulkFollowerUpdate(false);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {showFollowupsDue && (
+        <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-orange-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-orange-700">
+                <strong>Showing Follow-ups Due:</strong> Contacts that need attention today or are overdue
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowFollowupsDue(false);
+                window.history.pushState({}, '', '/contacts');
+              }}
+              className="text-orange-700 hover:text-orange-900 text-sm font-medium"
+            >
+              Clear Filter
+            </button>
           </div>
         </div>
       )}
