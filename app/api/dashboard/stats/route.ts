@@ -56,18 +56,16 @@ export async function GET(request: NextRequest) {
     const responseRate = totalContacted > 0 ? Math.round((totalResponded / totalContacted) * 100) : 0;
 
     // Follow-ups due (next_followup_date is today or in the past)
+    // ALWAYS show current user's follow-ups (personal only, not team's)
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
-    let followupsQuery = supabase
+    const { count: followupsDue } = await supabase
       .from('contacts')
       .select('*', { count: 'exact', head: true })
+      .eq('user_id', session.user.id) // Always filter by current logged-in user
       .not('next_followup_date', 'is', null)
       .lte('next_followup_date', today.toISOString());
-    if (userId) {
-      followupsQuery = followupsQuery.eq('user_id', userId);
-    }
-    const { count: followupsDue } = await followupsQuery;
 
     // Flagged emails (unread)
     const { count: unreadEmails } = await supabase

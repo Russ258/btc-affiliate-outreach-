@@ -40,6 +40,19 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    // Auto-set follow-up date based on status
+    let nextFollowupDate = body.next_followup_date;
+
+    if (body.status === 'interested' || body.status === 'responded') {
+      // Set follow-up for 5 days from now
+      const followupDate = new Date();
+      followupDate.setDate(followupDate.getDate() + 5);
+      nextFollowupDate = followupDate.toISOString();
+    } else if (body.status === 'accepted' || body.status === 'declined') {
+      // Clear follow-up if deal is closed
+      nextFollowupDate = null;
+    }
+
     const { data, error } = await supabase
       .from('contacts')
       .update({
@@ -55,7 +68,7 @@ export async function PATCH(
         tags: body.tags,
         first_contact_date: body.first_contact_date,
         last_contact_date: body.last_contact_date,
-        next_followup_date: body.next_followup_date,
+        next_followup_date: nextFollowupDate,
       })
       .eq('id', id)
       .select()
