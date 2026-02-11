@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 // GET /api/contacts/[id] - Get a single contact
 export async function GET(
@@ -7,6 +8,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const cookieStore = await cookies();
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
     const { id } = await params;
 
     const { data, error } = await supabase
@@ -37,6 +42,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const cookieStore = await cookies();
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
     const { id } = await params;
     const body = await request.json();
 
@@ -100,6 +109,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const cookieStore = await cookies();
+    // @ts-ignore - Next.js 15 compatibility: cookies() returns Promise but Supabase expects sync access
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
     const { id } = await params;
 
     const { error } = await supabase
