@@ -76,11 +76,11 @@ export async function PATCH(
       console.log('Creating contact from prospect...');
 
       // Create contact from prospect
-      // If no email or twitter, use a placeholder email to satisfy the constraint
+      // If no twitter handle but has YouTube, use @youtube_channel as twitter_handle
       const contactData = {
         name: prospect.name,
-        email: prospect.email || `${prospect.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@youtube.placeholder`,
-        twitter_handle: prospect.twitter_handle,
+        email: prospect.email,
+        twitter_handle: prospect.twitter_handle || (prospect.youtube_channel ? `@${prospect.youtube_channel}` : null),
         website: prospect.website || prospect.youtube_url || null,
         status: 'contacted',
         priority: prospect.confidence === 'HIGH' ? 'high' : prospect.confidence === 'LOW' ? 'low' : 'medium',
